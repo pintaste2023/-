@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>品點子平台完整設計文檔 - 四化設計 × 專案計劃書</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --bg-card: #ffffff;
+      --text-primary: #1e293b;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --accent-blue: #2563eb;
+      --accent-amber: #d97706;
+      --accent-purple: #7c3aed;
+      --accent-red: #dc2626;
+      --border: #e2e8f0;
+      --shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Noto Sans TC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    .deck {
+      position: relative;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+    }
+    .slides-container {
+      display: flex;
+      height: 100%;
+      transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .slide {
+      min-width: 100%;
+      height: 100%;
+      padding: 60px 100px;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-primary);
+      overflow-y: auto;
+    }
+    /* Navigation */
+    .nav {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(20px);
+      padding: 14px 28px;
+      border-radius: 50px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .nav-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      background: var(--text-primary);
+      color: var(--bg-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { background: var(--accent-blue); }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .nav-btn:disabled:hover { background: var(--text-primary); }
+    .progress-indicator {
+      font-size: 18px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      min-width: 80px;
+      text-align: center;
+    }
+    /* Typography */
+    .slide-title {
+      font-size: 3.8rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+    .slide-subtitle {
+      font-size: 1.6rem;
+      color: var(--text-secondary);
+      margin-bottom: 50px;
+    }
+    .section-label {
+      display: inline-block;
+      padding: 8px 18px;
+      background: rgba(37, 99, 235, 0.1);
+      color: var(--accent-blue);
+      border-radius: 25px;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+    /* Content Sections */
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      flex: 1;
+    }
+    .card {
+      background: var(--bg-card);
+      border-radius: 20px;
+      padding: 28px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .card-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+    .card-content {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    /* Tables */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .data-table th, .data-table td {
+      padding: 16px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table th {
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .data-table td { color: var(--text-primary); }
+    .data-table tr:last-child td { border-bottom: none; }
+    /* Quote */
+    .quote-block {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(37, 99, 235, 0.02) 100%);
+      border-left: 5px solid var(--accent-blue);
+      padding: 28px 32px;
+      border-radius: 0 16px 16px 0;
+      margin: 24px 0;
+    }
+    .quote-text {
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      font-family: 'Noto Serif TC', serif;
+      line-height: 1.6;
+    }
+    .quote-author {
+      margin-top: 14px;
+      font-size: 1.1rem;
+      color: var(--accent-blue);
+    }
+    /* Lists */
+    .feature-list {
+      list-style: none;
+    }
+    .feature-list li {
+      padding: 14px 0;
+      padding-left: 36px;
+      position: relative;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+      font-size: 1.15rem;
+    }
+    .feature-list li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent-blue);
+      font-weight: 600;
+    }
+    .feature-list li:last-child { border-bottom: none; }
+    /* Steps */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      padding: 22px;
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+    .step-number {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--accent-blue);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .step-content h4 {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+    .step-content p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+    }
+    /* Metrics */
+    .metric-card {
+      background: var(--bg-card);
+      border-radius: 20px;
+      padding: 32px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .metric-value {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+    }
+    .metric-label {
+      font-size: 1.3rem;
+      color: var(--text-secondary);
+      margin-top: 10px;
+    }
+    /* Highlight */
+    .highlight {
+      background: linear-gradient(90deg, var(--accent-blue), var(--accent-amber));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    /* Responsive */
+    @media (max-width: 768px) {
+      .slide { padding: 30px 24px; }
+      .slide-title { font-size: 2.4rem; }
+      .content-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck">
+    <div class="slides-container" id="slides">
+      
+      <!-- Slide 1: Cover -->
+      <section class="slide">
+        <span class="section-label">完整設計文檔</span>
+        <h1 class="slide-title">品點子平台</h1>
+        <p class="slide-title" style="color: var(--accent-blue); font-size: 3rem;">四化設計 × 專案計劃書</p>
+        <p class="slide-subtitle">用自己的創意，做出屬於自己的食品</p>
+        <div style="margin-top: auto;">
+          <p style="color: var(--text-muted); font-size: 1.2rem;">你永遠是老大，AI 只是你最好用的工具</p>
+        </div>
+      </section>
+
+      <!-- Slide 2: 四化對照 -->
+      <section class="slide">
+        <span class="section-label">一、四化與平台對照</span>
+        <h2 class="slide-title">四化設計覆蓋度</h2>
+        <p class="slide-subtitle">現況分析與缺口識別</p>
+        
+        <table class="data-table" style="margin-top: 24px;">
+          <thead>
+            <tr><th>四化</th><th>現況覆蓋度</th><th>缺口</th><th>建議方向</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>目標視覺化</strong></td>
+              <td><span style="color: var(--accent-amber); font-weight: 600;">30%</span></td>
+              <td>無進度條、旅程地圖、狀態顯示</td>
+              <td>進度條+動畫 / 每步轉化率埋點 / 可預測獎勵路徑</td>
+            </tr>
+            <tr>
+              <td><strong>回饋即時化</strong></td>
+              <td><span style="color: var(--accent-amber); font-weight: 600;">60%</span></td>
+              <td>缺少「確認信號」互動</td>
+              <td>毫秒級流式輸出 / 對話式引導 / magic moment</td>
+            </tr>
+            <tr>
+              <td><strong>難度個性化</strong></td>
+              <td><span style="color: var(--accent-amber); font-weight: 600;">40%</span></td>
+              <td>配方難度固定</td>
+              <td>動態難度調整 / 用戶畫像分層 / 最小可行難度</td>
+            </tr>
+            <tr>
+              <td><strong>失敗安全化</strong></td>
+              <td><span style="color: var(--accent-amber); font-weight: 600;">50%</span></td>
+              <td>無退費保障、滯銷處理</td>
+              <td>全额退費承諾 / 文案正向化 / fail=try again</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Slide 3: 一句話定位 -->
+      <section class="slide">
+        <span class="section-label">二、一句話定位</span>
+        <h2 class="slide-title">從廚房靈感到門市上架</h2>
+        <p class="slide-subtitle">2週完成——人人都是食品設計師</p>
+        
+        <div class="quote-block" style="margin-top: 50px;">
+          <p class="quote-text">讓沒有工廠、沒有設備、沒有通路的普通人，只要有一個想法，就能將創意變成現實商品。</p>
+        </div>
+        
+        <div class="content-grid" style="margin-top: 36px;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon" style="background: var(--accent-blue); color: #fff;">✓</div>
+              <span class="card-title">完整6步驟流程</span>
+            </div>
+            <p class="card-content">發想 → 上架，一站式完成</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon" style="background: var(--accent-blue); color: #fff;">✓</div>
+              <span class="card-title">AI超級助理</span>
+            </div>
+            <p class="card-content">AI負責配方+品牌生成</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon" style="background: var(--accent-blue); color: #fff;">✓</div>
+              <span class="card-title">用戶=創意總監</span>
+            </div>
+            <p class="card-content">創作者做所有關鍵決策</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon" style="background: var(--accent-blue); color: #fff;">✓</div>
+              <span class="card-title">99元低門檻</span>
+            </div>
+            <p class="card-content">產品開發大眾化</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 4: 核心哲學 -->
+      <section class="slide">
+        <span class="section-label">三、核心哲學</span>
+        <h2 class="slide-title">Jobs × 張一鳴</h2>
+        <p class="slide-subtitle">極簡主義 + 數據驅動</p>
+        
+        <div class="content-grid">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon" style="background: #1e293b; color: #fff;">J</div>
+              <span class="card-title">Jobs 原則</span>
+            </div>
+            <ul class="feature-list">
+              <li>極簡主義 - MVP只做4個P0功能</li>
+              <li>差異化 - 自有工廠+門市閉環</li>
+              <li>情感設計 - 每個時刻設計「成就感」</li>
+              <li>速度優先 - 2週快速上線迭代</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon" style="background: var(--accent-blue); color: #fff;">Z</div>
+              <span class="card-title">張一鳴原則</span>
+            </div>
+            <ul class="feature-list">
+              <li>數據驅動 - 每個環節轉化率指標</li>
+              <li>驗證優先 - 內部100人驗證再推</li>
+              <li>逐步收費 - MVP階段不收分潤</li>
+              <li>失敗預案 - 明確3個失敗點+解決</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 5: 創作者流程 -->
+      <section class="slide">
+        <span class="section-label">四、創作者核心流程</span>
+        <h2 class="slide-title">從靈感到上架</h2>
+        <p class="slide-subtitle">8個步驟完成產品開發</p>
+        
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <h4>輸入想法</h4>
+              <p>例：抹茶口味減脂餅乾</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <h4>AI 生成配方 + 成本預估</h4>
+              <p>食材列表、用量比例、製作步驟、預估成本</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <h4>99元試吃（可選）</h4>
+              <p>先看配方 → 決定要不要試吃 → 寄到家裡</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <h4>決定要不要生產</h4>
+              <p>滿意→進入品牌設計 / 不滿意→AI調整配方</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">5</div>
+            <div class="step-content">
+              <h4>AI 品牌生成</h4>
+              <p>命名+Logo+包裝風格+品牌故事</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">6</div>
+            <div class="step-content">
+              <h4>確認生產 → 付款 $700</h4>
+              <p>等1-2週生產</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">7</div>
+            <div class="step-content">
+              <h4>上架20家門市</h4>
+              <p>門市陳列展示</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">8</div>
+            <div class="step-content">
+              <h4>持續銷售 → 每月結算分潤</h4>
+              <p>被購買通知、收益結算</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 6: 配方調整 -->
+      <section class="slide">
+        <span class="section-label">五、配方調整機制</span>
+        <h2 class="slide-title">人類決定，AI建議</h2>
+        <p class="slide-subtitle">核心思路：人類才是那個可以品嘗到味道的人</p>
+        
+        <table class="data-table" style="margin-top: 24px;">
+          <thead>
+            <tr><th>調整類型</th><th>次數限制</th><th>說明</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>配方修改</td>
+              <td><strong>最多10次免費</strong></td>
+              <td>讓創作者找到滿意的配方</td>
+            </tr>
+            <tr>
+              <td>試吃</td>
+              <td>99元可試吃3次</td>
+              <td>第4次起恢復原價</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="quote-block" style="margin-top: 36px;">
+          <p class="quote-text">AI提供資訊和建議，但最終決定權在創作者。</p>
+          <p class="quote-author">調整次數：最多10次，用完為止</p>
+        </div>
+      </section>
+
+      <!-- Slide 7: AI品牌生成 -->
+      <section class="slide">
+        <span class="section-label">六、AI 品牌生成</span>
+        <h2 class="slide-title">不要設計，選擇就好</h2>
+        <p class="slide-subtitle">Jobs 設計理念：讓創作者「選擇」包裝</p>
+        
+        <table class="data-table" style="margin-top: 24px;">
+          <thead>
+            <tr><th>傳統創業</th><th>品點子平台</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>自己想品牌名稱</td><td>AI 生成 3 個名字給你選</td></tr>
+            <tr><td>自己找設計師做 Logo</td><td>AI 生成 Logo 給你選</td></tr>
+            <tr><td>自己找包裝設計</td><td>從 3 種風格中挑選</td></tr>
+            <tr><td>自己寫品牌故事</td><td>AI 幫你撰寫品牌故事</td></tr>
+          </tbody>
+        </table>
+        
+        <h3 style="margin-top: 36px; color: var(--text-secondary); font-size: 1.4rem;">三種包裝風格</h3>
+        <div class="content-grid" style="margin-top: 18px;">
+          <div class="card">
+            <span class="card-title">簡約風</span>
+            <p class="card-content">白底 + Logo，適合餅乾、糕點</p>
+          </div>
+          <div class="card">
+            <span class="card-title">活力風</span>
+            <p class="card-content">彩色 + 圖案，適合零食、堅果</p>
+          </div>
+          <div class="card">
+            <span class="card-title">文青風</span>
+            <p class="card-content">大地色 + 手寫感，適合茶包、蜂蜜</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 8: Wow Factor -->
+      <section class="slide">
+        <span class="section-label">七、Wow Factor</span>
+        <h2 class="slide-title">成就感時刻設計</h2>
+        <p class="slide-subtitle">借鑒 Jobs 的感動設計理念</p>
+        
+        <div class="content-grid" style="margin-top: 24px;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon" style="background: var(--accent-blue); color: #fff;">📦</div>
+              <span class="card-title">1. 開箱時刻</span>
+            </div>
+            <p class="card-content">收到的不是「試吃品」，是「你的第一個作品」</p>
+            <p style="margin-top: 14px; color: var(--accent-blue); font-style: italic; font-size: 1.1rem;">不是試吃，是「宣言」</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon" style="background: var(--accent-blue); color: #fff;">🏪</div>
+              <span class="card-title">2. 上架時刻</span>
+            </div>
+            <p class="card-content">門市內設立「新品區」，擺放小立牌「創作者：XXX」</p>
+            <p style="margin-top: 14px; color: var(--accent-blue); font-style: italic; font-size: 1.1rem;">不是賣東西，是「讓人看到自己的可能性」</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon" style="background: var(--accent-blue); color: #fff;">💰</div>
+              <span class="card-title">3. 被購買時刻</span>
+            </div>
+            <p class="card-content">App 通知「你的商品被購買了」+ 門市「銷售排行榜」</p>
+            <p style="margin-top: 14px; color: var(--accent-blue); font-style: italic; font-size: 1.1rem;">不是賺錢，是「成就感」</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 9: 多巴胺設計 -->
+      <section class="slide">
+        <span class="section-label">八、多巴胺刺激設計</span>
+        <h2 class="slide-title">四個遊戲化設計</h2>
+        <p class="slide-subtitle">期待感 + 即時確認 + 心流難度 + 失敗安全</p>
+        
+        <div class="content-grid">
+          <div class="card">
+            <span class="card-title">🎲 「配方解密」</span>
+            <p class="card-content">抽卡、揭開時刻、金光音效 - 期待感營造</p>
+          </div>
+          <div class="card">
+            <span class="card-title">⚡ 「創意冒險」系統</span>
+            <p class="card-content">經驗值、成就系統、升級動畫 - 即時確認信號</p>
+          </div>
+          <div class="card">
+            <span class="card-title">🎯 「能力匹配」挑戰</span>
+            <p class="card-content">難度選擇、關卡挑戰、剛剛好 - 心流難度</p>
+          </div>
+          <div class="card">
+            <span class="card-title">💬 「客戶評價」</span>
+            <p class="card-content">真實回饋、口碑認可 - 成就感與社交炫耀</p>
+          </div>
+        </div>
+        
+        <div style="margin-top: 36px;">
+          <h4 style="color: var(--text-secondary); font-size: 1.4rem; margin-bottom: 18px;">經驗值系統</h4>
+          <table class="data-table">
+            <thead><tr><th>獲得方式</th><th>經驗值</th><th>可換取</th></tr></thead>
+            <tbody>
+              <tr><td>完成配方</td><td>+10</td><td>-</td></tr>
+              <tr><td>完成試吃</td><td>+30</td><td>-</td></tr>
+              <tr><td>完成生產</td><td>+50</td><td>-</td></tr>
+              <tr><td>50點</td><td>-</td><td>AI調整+1次</td></tr>
+              <tr><td>200點</td><td>-</td><td>免費試吃1次</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Slide 10: 行銷方案 -->
+      <section class="slide">
+        <span class="section-label">九、行銷方案</span>
+        <h2 class="slide-title">三個行銷策略</h2>
+        <p class="slide-subtitle">待老闆確認</p>
+        
+        <div class="content-grid">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon" style="background: var(--accent-blue); color: #fff;">Z</div>
+              <span class="card-title">方案一：創作者故事</span>
+            </div>
+            <p class="card-content">核心：每個創作者都有自己的故事<br/>方向：「我用AI幫我把爺爺的配方變得更健康」</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon" style="background: #1e293b; color: #fff;">J</div>
+              <span class="card-title">方案二：情感行銷</span>
+            </div>
+            <p class="card-content">核心：不是在賣產品，是在賣「可能性」<br/>Slogan：「人人都是食品設計師」</p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon" style="background: var(--accent-purple); color: #fff;">M</div>
+              <span class="card-title">方案三：增長黑客</span>
+            </div>
+            <p class="card-content">核心：低成本、高效率獲取用戶<br/>策略：推薦獎��、��毒式傳播</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 11: 創作者留存 -->
+      <section class="slide">
+        <span class="section-label">十、創作者留存策略</span>
+        <h2 class="slide-title">三個策略</h2>
+        <p class="slide-subtitle">讓創作者成功、持續創作賺錢</p>
+        
+        <div class="content-grid">
+          <div class="card">
+            <span class="card-title">💰 賺錢數據化</span>
+            <p class="card-content">收入進度提醒、賺錢計算器、成功案例</p>
+          </div>
+          <div class="card">
+            <span class="card-title">❤️ 情感價值</span>
+            <p class="card-content">里程碑系統、成就徽章、個性化關懷</p>
+          </div>
+          <div class="card">
+            <span class="card-title">🤖 AI成長</span>
+            <p class="card-content">教學式AI、智能推薦、失敗=學習</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 12: 真正吸引人的 -->
+      <section class="slide">
+        <span class="section-label">十一、什麼是真正吸引人的？</span>
+        <h2 class="slide-title">消費者 + 創作者</h2>
+        <p class="slide-subtitle">AI行銷是「輔助」，不是「核心」</p>
+        
+        <div class="content-grid">
+          <div class="card">
+            <span class="card-title">對消費者</span>
+            <ul class="feature-list">
+              <li>產品好吃 - 口味才是關鍵</li>
+              <li>價格合理 - 性價比</li>
+              <li>購買方便 - 渠道便利</li>
+            </ul>
+          </div>
+          <div class="card">
+            <span class="card-title">對創作者</span>
+            <ul class="feature-list">
+              <li>能賺錢 - 收入明確</li>
+              <li>門檻低 - 99元試吃、50包生產</li>
+              <li>有人幫 - AI幫助 + 平台協助</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="quote-block" style="margin-top: 36px;">
+          <p class="quote-text">結論：消費者問「好吃嗎？」，創作者問「能賣出去嗎？」</p>
+        </div>
+      </section>
+
+      <!-- Slide 13: 不生產原因 -->
+      <section class="slide">
+        <span class="section-label">十二、「不生產」原因收集</span>
+        <h2 class="slide-title">問卷設計</h2>
+        <p class="slide-subtitle">最多3個問題，< 30秒填寫</p>
+        
+        <div class="card" style="margin-top: 24px;">
+          <h4 style="margin-bottom: 18px; font-size: 1.4rem;">問題設計</h4>
+          <ol style="color: var(--text-secondary); padding-left: 24px; line-height: 2.2; font-size: 1.15rem;">
+            <li>「請問你暫時不生產的原因是？」（單選）<br/>價格 / 口味 / 市場 / 時機 / 其他</li>
+            <li>「如果有以下服務，可能讓你更想生產？」（多選）<br/>更低起步量 / 更多銷售支持 / 更好試吃體驗</li>
+            <li>「其他建議？」（選填，開放式，最多100字）</li>
+          </ol>
+        </div>
+        
+        <div class="quote-block" style="margin-top: 24px;">
+          <p class="quote-text">問卷時機：用戶點擊「暫不生產」後彈出<br/>顯示：「幫助我們變得更好」</p>
+        </div>
+      </section>
+
+      <!-- Slide 14: 上架失敗保障 -->
+      <section class="slide">
+        <span class="section-label">十三、上架失敗保障</span>
+        <h2 class="slide-title">滯銷處理方案</h2>
+        <p class="slide-subtitle">三個方案，待老闆確認</p>
+        
+        <table class="data-table" style="margin-top: 24px;">
+          <thead><tr><th>方案</th><th>說明</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>方案A：預售模式（推薦）</strong></td>
+              <td>訂單夠50包才生產，創作者無庫存風險</td>
+            </tr>
+            <tr>
+              <td><strong>方案B：AI銷售預測</strong></td>
+              <td>上架前AI判斷能否賣出，降低滯銷機率</td>
+            </tr>
+            <tr>
+              <td><strong>方案C：平台協助促銷</strong></td>
+              <td>滯銷時平台幫忙促銷，但創作者仍需承擔庫存</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="quote-block" style="margin-top: 24px;">
+          <p class="quote-text">核心事實：工廠最低生產量50包 / 滯銷風險創作者自行承擔</p>
+        </div>
+      </section>
+
+      <!-- Slide 15: MVP功能 -->
+      <section class="slide">
+        <span class="section-label">十四、MVP 功能清單</span>
+        <h2 class="slide-title">2週開發</h2>
+        <p class="slide-subtitle">P0 核心功能</p>
+        
+        <table class="data-table" style="margin-top: 24px;">
+          <thead><tr><th>優先級</th><th>功能</th><th>說明</th></tr></thead>
+          <tbody>
+            <tr><td><span style="color: var(--accent-blue); font-weight: 600;">P0</span></td><td>AI配方生成</td><td>輸入想法 → 輸出配方+成本預估</td></tr>
+            <tr><td><span style="color: var(--accent-blue); font-weight: 600;">P0</span></td><td>99元試吃</td><td>先看配方 → 決定要不要試吃 → 寄到家裡</td></tr>
+            <tr><td><span style="color: var(--accent-blue); font-weight: 600;">P0</span></td><td>AI品牌生成</td><td>命名+Logo+包裝+品牌故事</td></tr>
+            <tr><td><span style="color: var(--accent-blue); font-weight: 600;">P0</span></td><td>生產服務</td><td>確認生產 → 付款 → 等1-2週 → 上架</td></tr>
+            <tr><td><span style="color: var(--accent-amber); font-weight: 600;">P1</span></td><td>首頁Hero</td><td>價值主張 + 創作入口</td></tr>
+            <tr><td><span style="color: var(--text-muted);">P2</span></td><td>門市功能</td><td>第二階段</td></tr>
+          </tbody>
+        </table>
+        
+        <h4 style="margin-top: 24px; color: var(--accent-red); font-size: 1.3rem;">MVP 砍掉的功能：</h4>
+        <p style="color: var(--text-secondary); font-size: 1.15rem;">品牌靈感、許願池、等級系統、創作者個人頁面、KIOSK、配方市場</p>
+      </section>
+
+      <!-- Slide 16: 商業模式 -->
+      <section class="slide">
+        <span class="section-label">十五、商業模式</span>
+        <h2 class="slide-title">營收來源</h2>
+        <p class="slide-subtitle">三階段</p>
+        
+        <table class="data-table" style="margin-top: 24px;">
+          <thead><tr><th>階段</th><th>收入</th><th>對象</th><th>分潤</th></tr></thead>
+          <tbody>
+            <tr><td>MVP驗證期</td><td>99元試吃</td><td>創作者</td><td>0%</td></tr>
+            <tr><td>MVP驗證期</td><td>$700生產服務費</td><td>創作者</td><td>0%</td></tr>
+            <tr><td>驗證成功後</td><td>生產服務費</td><td>創作者</td><td>0%</td></tr>
+            <tr><td>規模化後</td><td>門市分潤</td><td>平台</td><td>5-10%</td></tr>
+          </tbody>
+        </table>
+        
+        <div class="content-grid" style="margin-top: 30px;">
+          <div class="card">
+            <span class="card-title">成本結構（創作者視角）</span>
+            <p class="card-content">原料$1,500 + 包裝$500 + 物流$300 = 工廠成本$2,300<br/>服務費$700<br/>總成本：$3,000</p>
+          </div>
+          <div class="card">
+            <span class="card-title">建議售價</span>
+            <p class="card-content">$80 × 50包 = $4,000<br/>創作者利潤：$1,000</p>
+          </div>
+        </div>
+        
+        <div class="quote-block" style="margin-top: 24px;">
+          <p class="quote-text">張一鳴原則：「先讓一部分人賺到錢，再從賺到的人身上收費。」</p>
+        </div>
+      </section>
+
+      <!-- Slide 17: 四個關鍵指標 -->
+      <section class="slide">
+        <span class="section-label">十六、驗證指標</span>
+        <h2 class="slide-title">四個關鍵指標</h2>
+        <p class="slide-subtitle">漏斗關係</p>
+        
+        <div class="content-grid" style="margin-top: 24px;">
+          <div class="metric-card">
+            <div class="metric-value">30%</div>
+            <div class="metric-label">配方生成率</div>
+            <p style="font-size: 1rem; color: var(--text-muted); margin-top: 10px;">AI能幫你想出靠譜的配方嗎？</p>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">10%</div>
+            <div class="metric-label">試吃購買率</div>
+            <p style="font-size: 1rem; color: var(--text-muted); margin-top: 10px;">你願意花99元驗證你的想法嗎？</p>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">30%</div>
+            <div class="metric-label">生產轉換率</div>
+            <p style="font-size: 1rem; color: var(--text-muted); margin-top: 10px;">試吃完，你真的想把它變成商品嗎？</p>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">30%</div>
+            <div class="metric-label">門市取貨率</div>
+            <p style="font-size: 1rem; color: var(--text-muted); margin-top: 10px;">消費者會來我們門市取貨嗎？</p>
+          </div>
+        </div>
+        
+        <div class="quote-block" style="margin-top: 30px;">
+          <p class="quote-text">核心理念：AI配方→願意試吃→決定生產→來門市取貨<br/>每個環節都要驗證用戶意願</p>
+        </div>
+      </section>
+
+      <!-- Slide 18: 失敗點 -->
+      <section class="slide">
+        <span class="section-label">十七、三個失敗點</span>
+        <h2 class="slide-title">張一鳴警告</h2>
+        <p class="slide-subtitle">預備方案</p>
+        
+        <table class="data-table" style="margin-top: 24px;">
+          <thead><tr><th>失敗點</th><th>原因</th><th>解決方案</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span style="color: var(--accent-red); font-weight: 600;">沒人輸入想法</span></td>
+              <td>需求不存在</td>
+              <td>重新定位目標用戶</td>
+            </tr>
+            <tr>
+              <td><span style="color: var(--accent-red); font-weight: 600;">沒人願意付99元</span></td>
+              <td>配方不夠好</td>
+              <td>優化AI配方質量</td>
+            </tr>
+            <tr>
+              <td><span name="no-production">沒人願意生產</span></td>
+              <td>賺不到錢</td>
+              <td>調整生產成本結構</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="content-grid" style="margin-top: 30px;">
+          <div class="card">
+            <span class="card-title">預備方案</span>
+            <p class="card-content">內部測試失敗 → 找出問題，優化再試<br/>只有1-2個案例 → 繼續跑直到有3個<br/>外部驗證失敗 → 回到內部優化</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 19: 執行計劃 -->
+      <section class="slide">
+        <span class="section-label">十八、執行計劃</span>
+        <h2 class="slide-title">8週里程碑</h2>
+        <p class="slide-subtitle">Week 1-8</p>
+        
+        <div class="steps">
+          <div class="step">
+            <div class="step-number" style="background: var(--accent-blue);">W1-2</div>
+            <div class="step-content">
+              <h4>開發上線</h4>
+              <p>首頁Hero + AI配方 + 99元試吃 + AI品牌 + 生產服務</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number" style="background: var(--accent-purple);">W3-4</div>
+            <div class="step-content">
+              <h4>內部驗證</h4>
+              <p>100人測試 + 收集反饋 + 產出3個成功案例</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number" style="background: var(--accent-amber);">W5-6</div>
+            <div class="step-content">
+              <h4>案例宣傳</h4>
+              <p>成功案例內容 + 門市自然購買 + FB/IG投放</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number" style="background: var(--accent-blue);">W7-8</div>
+            <div class="step-content">
+              <h4>外部驗證</h4>
+              <p>外部用戶測試 + 數據分析 + 決定下一步</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 20: 用戶分類 -->
+      <section class="slide">
+        <span class="section-label">十九、用戶分類</span>
+        <h2 class="slide-title">優先級排序</h2>
+        
+        <div class="content-grid" style="margin-top: 24px;">
+          <div class="card" style="border-color: var(--accent-blue); border-width: 2px;">
+            <span class="card-title" style="color: var(--accent-blue);">P0 - 想創業的素人</span>
+            <p class="card-content">第一階段只服務這群人</p>
+          </div>
+          <div class="card">
+            <span class="card-title">P1 - 吃貨</span>
+            <p class="card-content">第二階段再開放</p>
+          </div>
+          <div class="card">
+            <span class="card-title">P1 - 網紅</span>
+            <p class="card-content">第二階段再開放</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 21: 門市功能 -->
+      <section class="slide">
+        <span class="section-label">二十、門市功能</span>
+        <h2 class="slide-title">第二階段再做</h2>
+        
+        <ul class="feature-list" style="margin-top: 24px; font-size: 1.3rem;">
+          <li>取貨點 - 創作者商品可在門市取</li>
+          <li>門市列表 - 顯示20家門市位置</li>
+          <li>門市陳列 - 「新品區」陳列創作者商品</li>
+          <li>直接購買 - 消費者直接在門市櫃檯結帳</li>
+          <li>線上取貨 - 線上下單 → 門市取貨</li>
+        </ul>
+      </section>
+
+      <!-- Slide 22: 總結 -->
+      <section class="slide">
+        <span class="section-label">二十一、總結表</span>
+        <h2 class="slide-title">核心資訊</h2>
+        
+        <table class="data-table" style="margin-top: 24px;">
+          <thead><tr><th>項目</th><th>內容</th></tr></thead>
+          <tbody>
+            <tr><td>一句話定位</td><td>從廚房靈感到門市上架，2週完成——人人都是食品設計師</td></tr>
+            <tr><td>你是誰</td><td>創意總監 — 決定產品的靈魂和方向</td></tr>
+            <tr><td>AI是誰</td><td>超級助理 — 幫你生成配方和品牌</td></tr>
+            <tr><td>關鍵數字</td><td>99元試吃、50包生產、20家門市、$700服務費</td></tr>
+            <tr><td>感動設計</td><td>開箱宣言、上架立牌、購買通知</td></tr>
+            <tr><td>MVP時間</td><td>2週開發 + 6週驗證（共8週）</td></tr>
+            <tr><td>分潤策略</td><td>MVP階段0%，規模化後5-10%</td></tr>
+            <tr><td>驗證目標</td><td>3個成功案例</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Slide 23: 為什麼符合 -->
+      <section class="slide">
+        <span class="section-label">二十二、符合標準</span>
+        <h2 class="slide-title">簡單、好玩、有吸引力、可行性、獲利</h2>
+        
+        <div class="content-grid" style="margin-top: 24px;">
+          <div class="card" style="border-color: var(--accent-blue); border-width: 2px;">
+            <span class="card-title" style="color: var(--accent-blue);">簡單</span>
+            <p class="card-content">只需要4個核心功能，其他全部砍掉</p>
+          </div>
+          <div class="card">
+            <span class="card-title">好玩</span>
+            <p class="card-content">自己創造產品、99元驗證、Wow Factor成就感設計</p>
+          </div>
+          <div class="card">
+            <span class="card-title">吸引力</span>
+            <p class="card-content">99元圓夢、自有工廠+門市完整閉環</p>
+          </div>
+          <div class="card">
+            <span class="card-title">可行性</span>
+            <p class="card-content">有工廠、有門市、有AI、50包小量可執行</p>
+          </div>
+          <div class="card">
+            <span class="card-title">獲利</span>
+            <p class="card-content">$700服務費 + 規模化後5-10%分潤</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 24: 下一步行動 -->
+      <section class="slide">
+        <span class="section-label">二十三、下一步行動</span>
+        <h2 class="slide-title">誰，做什麼</h2>
+        
+        <div class="content-grid" style="margin-top: 24px;">
+          <div class="card">
+            <span class="card-title">開發</span>
+            <p class="card-content">Week 1-2 完成MVP功能</p>
+          </div>
+          <div class="card">
+            <span class="card-title">運營</span>
+            <p class="card-content">Week 3-4 進行內部100人測試</p>
+          </div>
+          <div class="card">
+            <span class="card-title">產品</span>
+            <p class="card-content">收集反饋並優化</p>
+          </div>
+          <div class="card">
+            <span class="card-title">商務</span>
+            <p class="card-content">Week 5-6 準備案例宣傳素材</p>
+          </div>
+        </div>
+        
+        <div class="quote-block" style="margin-top: 50px;">
+          <p class="quote-text">「先跑通一個案例，再想擴展。」—— 張一鳴</p>
+          <p class="quote-text" style="margin-top: 14px;">「不要做10件事，做1件做到極致。」—— Steve Jobs</p>
+          <p class="quote-author" style="margin-top: 18px;">「你永遠是老大，AI 只是你最好用的工具。」—— 品點子</p>
+        </div>
+      </section>
+
+    </div>
+    
+    <!-- Navigation -->
+    <nav class="nav">
+      <button class="nav-btn" id="prevBtn" aria-label="上一頁">←</button>
+      <span class="progress-indicator"><span id="currentSlide">1</span> / <span id="totalSlides">24</span></span>
+      <button class="nav-btn" id="nextBtn" aria-label="下一頁">→</button>
+    </nav>
+  </div>
+
+  <script>
+    const slidesContainer = document.getElementById('slides');
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const currentSlideEl = document.getElementById('currentSlide');
+    const totalSlidesEl = document.getElementById('totalSlides');
+    
+    let currentIndex = 0;
+    const totalSlides = slides.length;
+    totalSlidesEl.textContent = totalSlides;
+    
+    function updateSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= totalSlides) index = totalSlides - 1;
+      currentIndex = index;
+      slidesContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
+      currentSlideEl.textContent = currentIndex + 1;
+      prevBtn.disabled = currentIndex === 0;
+      nextBtn.disabled = currentIndex === totalSlides - 1;
+    }
+    
+    prevBtn.addEventListener('click', () => updateSlide(currentIndex - 1));
+    nextBtn.addEventListener('click', () => updateSlide(currentIndex + 1));
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        updateSlide(currentIndex - 1);
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+        updateSlide(currentIndex + 1);
+      } else if (e.key === 'Home') {
+        updateSlide(0);
+      } else if (e.key === 'End') {
+        updateSlide(totalSlides - 1);
+      }
+    });
+    
+    // Touch support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    slidesContainer.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    slidesContainer.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) {
+          updateSlide(currentIndex + 1);
+        } else {
+          updateSlide(currentIndex - 1);
+        }
+      }
+    });
+    
+    // Initialize
+    updateSlide(0);
+  </script>
+</body>
+</html>
